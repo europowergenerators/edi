@@ -8,7 +8,7 @@ from io import BytesIO
 
 from lxml import etree
 
-from odoo import _, api, models
+from odoo import _, api, models, fields
 from odoo.exceptions import UserError
 from odoo.tools import file_open, float_is_zero, float_round
 
@@ -272,12 +272,19 @@ class BaseUbl(models.AbstractModel):
         return supplier_party_root
 
     @api.model
-    def _ubl_add_delivery(self, delivery_partner, parent_node, ns, version="2.1"):
+    def _ubl_add_delivery(self, delivery_partner, parent_node, ns, delivery_date=False, version="2.1"):
         delivery = etree.SubElement(parent_node, ns["cac"] + "Delivery")
         delivery_location = etree.SubElement(delivery, ns["cac"] + "DeliveryLocation")
         self._ubl_add_address(
             delivery_partner, "Address", delivery_location, ns, version=version
         )
+        if delivery_date:
+            delivery_date = fields.Date.to_string(delivery_date)
+            delivery_requested_period = etree.SubElement(delivery, ns["cac"] + "RequestedDeliveryPeriod")
+            delivery_start_date = etree.SubElement(delivery_requested_period, ns["cbc"] + "StartDate")
+            delivery_start_date.text = delivery_date
+            delivery_end_date = etree.SubElement(delivery_requested_period, ns["cbc"] + "EndDate")
+            delivery_end_date.text = delivery_date
         self._ubl_add_party(
             delivery_partner, False, "DeliveryParty", delivery, ns, version=version
         )
