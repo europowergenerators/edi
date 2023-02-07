@@ -99,6 +99,7 @@ class PurchaseOrder(models.Model):
             price_subtotal=oline.price_subtotal,
             qty_precision=qty_precision,
             price_precision=price_precision,
+            delivery_date=oline.date_planned,
             version=version,
         )
 

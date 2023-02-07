@@ -319,6 +319,7 @@ class BaseUbl(models.AbstractModel):
         price_subtotal=False,
         qty_precision=3,
         price_precision=2,
+        delivery_date=False,
         version="2.1",
     ):
         line_item = etree.SubElement(parent_node, ns["cac"] + "LineItem")
@@ -335,6 +336,15 @@ class BaseUbl(models.AbstractModel):
                 line_item, ns["cbc"] + "LineExtensionAmount", currencyID=currency.name
             )
             line_amount.text = str(price_subtotal)
+        if delivery_date:
+            delivery_date = fields.Date.to_string(delivery_date)
+            delivery = etree.SubElement(line_item, ns["cac"] + "Delivery")
+            delivery_requested_period = etree.SubElement(delivery, ns["cac"] + "RequestedDeliveryPeriod")
+            delivery_start_date = etree.SubElement(delivery_requested_period, ns["cbc"] + "StartDate")
+            delivery_start_date.text = delivery_date
+            delivery_end_date = etree.SubElement(delivery_requested_period, ns["cbc"] + "EndDate")
+            delivery_end_date.text = delivery_date        
+        if currency and price_subtotal:            
             price_unit = 0.0
             # Use price_subtotal/qty to compute price_unit to be sure
             # to get a *tax_excluded* price unit
