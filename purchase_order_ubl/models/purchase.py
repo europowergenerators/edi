@@ -17,11 +17,11 @@ class PurchaseOrder(models.Model):
 
     @api.model
     def get_rfq_states(self):
-        return ["draft", "sent", "to approve"]
+        return []
 
     @api.model
     def get_order_states(self):
-        return ["purchase", "done"]
+        return ["draft", "sent", "to approve", "purchase", "done"]
 
     def _ubl_add_header(self, doc_type, parent_node, ns, version="2.1"):
         if doc_type == "rfq":
