@@ -361,8 +361,16 @@ class BaseUbl(models.AbstractModel):
                 price, ns["cbc"] + "BaseQuantity", unitCode=uom.unece_code
             )
             base_qty.text = "1"  # What else could it be ?
+        
+        product_name = False
+        seller_code = False
+        sellers = product._select_seller(partner_id=seller, quantity=quantity, date=None, uom_id=uom)
+        if sellers:
+            product_name = sellers[0].product_name
+            seller_code = sellers[0].product_code
+
         self._ubl_add_item(
-            name, product, line_item, ns, type_=type_, seller=seller, version=version
+            name, product, line_item, ns, type_=type_, product_name=product_name, seller_code=seller_code, version=version
         )
 
     def _ubl_get_seller_code_from_product(self, product):
@@ -385,23 +393,15 @@ class BaseUbl(models.AbstractModel):
         type_="purchase",
         seller=False,
         customer=False,
+        product_name=False,
+        seller_code=False,   
         version="2.1",
     ):
         """Beware that product may be False (in particular on invoices)"""
         assert type_ in ("sale", "purchase"), "Wrong type param"
         assert name, "name is a required arg"
         item = etree.SubElement(parent_node, ns["cac"] + "Item")
-        product_name = False
-        seller_code = False
         if product:
-            if type_ == "purchase":
-                if seller:
-                    sellers = product._select_seller(
-                        partner_id=seller, quantity=0.0, date=None, uom_id=False
-                    )
-                    if sellers:
-                        product_name = sellers[0].product_name
-                        seller_code = sellers[0].product_code
             if not seller_code:
                 seller_code = self._ubl_get_seller_code_from_product(product)
             if not product_name:
