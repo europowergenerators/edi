@@ -77,6 +77,7 @@ class PurchaseOrder(models.Model):
             line_root,
             ns,
             seller=self.partner_id.commercial_partner_id,
+            delivery_date=oline.date_planned,
             version=version,
         )
 
@@ -132,7 +133,7 @@ class PurchaseOrder(models.Model):
                 version=version,
             )
         delivery_partner = self.get_delivery_partner()
-        self._ubl_add_delivery(delivery_partner, xml_root, ns, version=version)
+        self._ubl_add_delivery(delivery_partner, xml_root, ns, delivery_date=self.date_planned, version=version)
         if self.incoterm_id:
             self._ubl_add_delivery_terms(
                 self.incoterm_id, xml_root, ns, version=version
